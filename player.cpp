@@ -64,14 +64,12 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 
             if (board.checkMove(next, BLACK))
             {
-                std::cerr << "Valid move" << std::endl;
                 copy->doMove(next, BLACK);
                 if (valid == false)
                 {
                     max_score = copy->count(BLACK) - copy->count(WHITE);
                     max_x = next->getX();
                     max_y = next->getY();
-                    std::cerr << "max_x 1: " << max_x << "max_y 1" << max_y << std::endl; 
                     if ( (x == 0 and y == 0) 
                         or (x == (SIZE_LEN - 1) and y == 0) 
                         or (x == 0 and y == (SIZE_LEN - 1)) 
@@ -105,9 +103,6 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
                 }
 
                 int difference = copy->count(BLACK) - copy->count(WHITE);
-                
-                std::cerr << copy->count(WHITE) << " " << copy->count(BLACK) << std::endl;
-                std::cerr << "max_x 2: " << max_x << "max_y 2" << max_y << std::endl; 
 
                 if ( (x == 0 and y == 0) 
                     or (x == (SIZE_LEN - 1) and y == 0) 
@@ -143,8 +138,6 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
                     max_x = next->getX();
                     max_y = next->getY();
                     max_score = difference;
-                    std::cerr << "max_x 3: " << max_x << "max_y 3" << max_y << std::endl; 
-                    std::cerr << "updating...max_score: " << max_score << std::endl;
                 }
 
                 
@@ -153,11 +146,9 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     }
 
 
-    std::cerr << "DONE max_x is " << max_x << std::endl;
 
     if ( max_x == -1 )
     {
-        std::cerr << "null, max_x is " << max_x << std::endl;
         return nullptr;
     }
 
