@@ -5,6 +5,8 @@
 #include "common.hpp"
 using namespace std;
 
+#define SIZE_LEN 8
+
 class Board {
 
 private:
