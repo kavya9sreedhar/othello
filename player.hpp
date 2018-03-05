@@ -6,7 +6,10 @@
 #include "board.hpp"
 using namespace std;
 
-#define MULTIPLIER 3
+#define CORNER_MUL 3
+#define EDGE_MUL 2
+#define DIAG_CORN -3
+#define OTHER_CORN -2
 
 class Player {
 
