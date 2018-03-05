@@ -6,6 +6,8 @@
 #include "board.hpp"
 using namespace std;
 
+#define MULTIPLIER 3
+
 class Player {
 
 public:

@@ -44,23 +44,85 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      * TODO: Implement how moves your AI should play here. You should first
      * process the opponent's opponents move before calculating your own move
      */
+
     board.doMove(opponentsMove, WHITE);
+
+    int max_x = -1;
+    int max_y = -1;
+    int max_score;
+
+    bool valid = false;
+
+    Board *copy = board.copy();
     Move *next = new Move(0, 0);
     for (int x = 0; x < SIZE_LEN; x++)
     {
         for (int y = 0; y < SIZE_LEN; y++)
         {
+            copy = board.copy();
             *next = Move(x, y);
+
             if (board.checkMove(next, BLACK))
             {
                 std::cerr << "Valid move" << std::endl;
-                board.doMove(next, BLACK);
-                std::cerr << board.count(WHITE) << " " << board.count(BLACK) << std::endl;
-                return next;
+                copy->doMove(next, BLACK);
+                if (valid == false)
+                {
+                    max_score = copy->count(BLACK) - copy->count(WHITE);
+                    max_x = next->getX();
+                    max_y = next->getY();
+                    std::cerr << "max_x 1: " << max_x << "max_y 1" << max_y << std::endl; 
+                    if ( (x == 0 and y == 0) 
+                        or (x == (SIZE_LEN - 1) and y == 0) 
+                        or (x == 0 and y == (SIZE_LEN - 1)) 
+                        or (x == (SIZE_LEN - 1) and y == (SIZE_LEN - 1)) )
+                    {
+                        max_score *= MULTIPLIER;
+                    }
+                    valid = true;
+                }
+
+                int difference = copy->count(BLACK) - copy->count(WHITE);
+                
+                std::cerr << copy->count(WHITE) << " " << copy->count(BLACK) << std::endl;
+                std::cerr << "max_x 2: " << max_x << "max_y 2" << max_y << std::endl; 
+
+                if ( (x == 0 and y == 0) 
+                    or (x == (SIZE_LEN - 1) and y == 0) 
+                    or (x == 0 and y == (SIZE_LEN - 1)) 
+                    or (x == (SIZE_LEN - 1) and y == (SIZE_LEN - 1)) )
+                {
+                    difference *= MULTIPLIER;
+                }
+
+                if (difference >= max_score)
+                {
+                    max_x = next->getX();
+                    max_y = next->getY();
+                    max_score = copy->count(BLACK) - copy->count(WHITE);
+
+
+                    std::cerr << "max_x 3: " << max_x << "max_y 3" << max_y << std::endl; 
+
+                    std::cerr << "updating...max_score: " << max_score << std::endl;
+                }
+
+                
             }
         }
     }
 
-    std::cerr << "null" << std::endl;
-    return nullptr;
+
+    std::cerr << "DONE max_x is " << max_x << std::endl;
+
+    if ( max_x == -1 )
+    {
+        std::cerr << "null, max_x is " << max_x << std::endl;
+        return nullptr;
+    }
+
+    *next = Move(max_x, max_y);
+    board.doMove( next, BLACK );
+    return next;
+    
 }

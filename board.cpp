@@ -41,6 +41,7 @@ void Board::set(Side side, int x, int y) {
     black.set(x + 8*y, side == BLACK);
 }
 
+
 bool Board::onBoard(int x, int y) {
     return(0 <= x && x < 8 && 0 <= y && y < 8);
 }
@@ -140,6 +141,7 @@ void Board::doMove(Move *m, Side side) {
     }
     set(side, X, Y);
 }
+
 
 /*
  * Current count of given side's stones.
