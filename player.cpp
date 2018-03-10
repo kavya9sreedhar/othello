@@ -11,6 +11,17 @@ Player::Player(Side side) {
     // Will be set to true in test_minimax.cpp.
     testingMinimax = false;
 
+    our_side = side;
+
+    if (side == WHITE)
+    {
+        other_side = BLACK;
+    }
+    else 
+    {
+        other_side = WHITE;
+    }
+
     board = Board();
 
     /*
@@ -45,7 +56,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      * process the opponent's opponents move before calculating your own move
      */
 
-    board.doMove(opponentsMove, WHITE);
+    board.doMove(opponentsMove, other_side);
 
     int max_x = -1;
     int max_y = -1;
@@ -62,12 +73,12 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
             copy = board.copy();
             *next = Move(x, y);
 
-            if (board.checkMove(next, BLACK))
+            if (board.checkMove(next, our_side))
             {
-                copy->doMove(next, BLACK);
+                copy->doMove(next, our_side);
                 if (valid == false)
                 {
-                    max_score = copy->count(BLACK) - copy->count(WHITE);
+                    max_score = copy->count(our_side) - copy->count(other_side);
                     max_x = next->getX();
                     max_y = next->getY();
                     if ( (x == 0 and y == 0) 
@@ -102,7 +113,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
                     valid = true;
                 }
 
-                int difference = copy->count(BLACK) - copy->count(WHITE);
+                int difference = copy->count(our_side) - copy->count(other_side);
 
                 if ( (x == 0 and y == 0) 
                     or (x == (SIZE_LEN - 1) and y == 0) 
@@ -153,7 +164,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     }
 
     *next = Move(max_x, max_y);
-    board.doMove( next, BLACK );
+    board.doMove( next, our_side );
     return next;
     
 }
