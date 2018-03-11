@@ -50,6 +50,42 @@ Player::~Player() {
  * The move returned must be legal; if there are no valid moves for your side,
  * return nullptr.
  */
+
+int Player::applyHeuristic(int x, int y, int current_max)
+{
+    int max_score = current_max;
+    if ( (x == 0 and y == 0) 
+        or (x == (SIZE_LEN - 1) and y == 0) 
+        or (x == 0 and y == (SIZE_LEN - 1)) 
+        or (x == (SIZE_LEN - 1) and y == (SIZE_LEN - 1)) )
+    {
+        max_score *= CORNER_MUL;
+    }
+
+    if ((x == 0) or (y == 0) or (x == SIZE_LEN - 1) or (y == SIZE_LEN - 1))
+    {
+        max_score *= EDGE_MUL;
+    }
+
+    if ((x == 1 and y == SIZE_LEN - 2) or 
+        (x == 1 and y == 1) or 
+        (x == SIZE_LEN - 2 and y == 1) or 
+        (x == SIZE_LEN - 2 and y == SIZE_LEN - 2))
+    {
+        max_score *= DIAG_CORN;
+    }
+
+    if ((x == 0 and y == 1) or (x == 0 and y == SIZE_LEN - 2) or
+        (x == SIZE_LEN - 1 and y == 1) or (x == SIZE_LEN - 1 and y == SIZE_LEN - 2) or
+        (x == 1 and y == 0) or (x == 1 and y == SIZE_LEN - 1) or
+        (x == SIZE_LEN - 2 and y == 0) or (x == SIZE_LEN - 2 and y == SIZE_LEN - 1))
+    {
+        max_score *= OTHER_CORN;
+    }
+
+    return max_score;
+}
+
 Move *Player::doMove(Move *opponentsMove, int msLeft) {
     /*
      * TODO: Implement how moves your AI should play here. You should first
@@ -81,77 +117,19 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
                     max_score = copy->count(our_side) - copy->count(other_side);
                     max_x = next->getX();
                     max_y = next->getY();
-                    if ( (x == 0 and y == 0) 
-                        or (x == (SIZE_LEN - 1) and y == 0) 
-                        or (x == 0 and y == (SIZE_LEN - 1)) 
-                        or (x == (SIZE_LEN - 1) and y == (SIZE_LEN - 1)) )
-                    {
-                        max_score *= CORNER_MUL;
-                    }
-
-                    if ((x == 0) or (y == 0) or (x == SIZE_LEN - 1) or (y == SIZE_LEN - 1))
-                    {
-                        max_score *= EDGE_MUL;
-                    }
-
-                    if ((x == 1 and y == SIZE_LEN - 2) or 
-                        (x == 1 and y == 1) or 
-                        (x == SIZE_LEN - 2 and y == 1) or 
-                        (x == SIZE_LEN - 2 and y == SIZE_LEN - 2))
-                    {
-                        max_score *= DIAG_CORN;
-                    }
-
-                    if ((x == 0 and y == 1) or (x == 0 and y == SIZE_LEN - 2) or
-                        (x == SIZE_LEN - 1 and y == 1) or (x == SIZE_LEN - 1 and y == SIZE_LEN - 2) or
-                        (x == 1 and y == 0) or (x == 1 and y == SIZE_LEN - 1) or
-                        (x == SIZE_LEN - 2 and y == 0) or (x == SIZE_LEN - 2 and y == SIZE_LEN - 1))
-                    {
-                        max_score *= OTHER_CORN;
-                    }
-
+                    max_score = applyHeuristic(max_x, max_y, max_score);
                     valid = true;
                 }
 
                 int difference = copy->count(our_side) - copy->count(other_side);
-
-                if ( (x == 0 and y == 0) 
-                    or (x == (SIZE_LEN - 1) and y == 0) 
-                    or (x == 0 and y == (SIZE_LEN - 1)) 
-                    or (x == (SIZE_LEN - 1) and y == (SIZE_LEN - 1)) )
-                {
-                    difference *= CORNER_MUL;
-                }
-
-                if ((x == 0) or (y == 0) or (x == SIZE_LEN - 1) or (y == SIZE_LEN - 1))
-                {
-                        difference *= EDGE_MUL;
-                }
-
-                if ((x == 1 and y == SIZE_LEN - 2) or 
-                        (x == 1 and y == 1) or 
-                        (x == SIZE_LEN - 2 and y == 1) or 
-                        (x == SIZE_LEN - 2 and y == SIZE_LEN - 2))
-                {
-                        difference *= DIAG_CORN;
-                }
-
-                if ((x == 0 and y == 1) or (x == 0 and y == SIZE_LEN - 2) or
-                        (x == SIZE_LEN - 1 and y == 1) or (x == SIZE_LEN - 1 and y == SIZE_LEN - 2) or
-                        (x == 1 and y == 0) or (x == 1 and y == SIZE_LEN - 1) or
-                        (x == SIZE_LEN - 2 and y == 0) or (x == SIZE_LEN - 2 and y == SIZE_LEN - 1))
-                {
-                        difference *= OTHER_CORN;
-                }
+                difference = applyHeuristic(x, y, difference);
 
                 if (difference > max_score)
                 {
                     max_x = next->getX();
                     max_y = next->getY();
                     max_score = difference;
-                }
-
-                
+                }                
             }
         }
     }
@@ -164,7 +142,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     }
 
     *next = Move(max_x, max_y);
-    board.doMove( next, our_side );
+    board.doMove(next, our_side);
     return next;
     
 }
