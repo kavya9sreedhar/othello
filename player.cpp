@@ -44,7 +44,7 @@ Player::~Player() {
 
 int Player::applyHeuristic(Board *board)
 {
-    int score;
+    int score = 0;
 
     for (int i = 0; i < SIZE_LEN; i++) 
     {
@@ -69,8 +69,8 @@ int Player::get_worst_case(Board *board)
 
     int worst_score = BEST_SCORE + 1;
 
-    int worst_x;
-    int worst_y;
+    int worst_x = -1;
+    int worst_y = -1;
 
     int check;
 
@@ -150,8 +150,8 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 
     board.doMove(opponentsMove, other_side);
 
-    int best_x;
-    int best_y;
+    int best_x = -1;
+    int best_y = -1;
 
     int minimax = WORST_SCORE - 1;
     int check;
