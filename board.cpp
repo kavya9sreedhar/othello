@@ -180,3 +180,36 @@ void Board::setBoard(char data[]) {
         }
     }
 }
+
+
+bool Board::ourside_taken(int x, int y, Side side)
+{
+    if ((side == WHITE and taken[x + 8*y] == 1 and black[x + 8*y] != 1) or
+       (side == BLACK and taken[x + 8*y] == 1 and black[x + 8*y] == 1))
+    {
+        return true;
+    }
+    else 
+    {
+        return false;
+    }
+
+}
+
+int Board::get_num_legal_moves(Side side) {
+    int legal = 0;
+    Move move = Move(0, 0);
+    for (int x = 0; x < 8; x++)
+    {
+        for (int y = 0; y < 8; y++)
+        {
+            move = Move(x, y);
+            if(this->checkMove(&move, side))
+            {
+                legal++;
+            }
+
+        }
+    }
+    return legal;
+}

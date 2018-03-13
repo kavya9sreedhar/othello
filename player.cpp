@@ -1,7 +1,5 @@
 #include "player.hpp"
 
-// This is a small change to practice using git :P
-
 /*
  * Constructor for the player; initialize everything here. The side your AI is
  * on (BLACK or WHITE) is passed in as "side". The constructor must finish
@@ -13,14 +11,7 @@ Player::Player(Side side) {
 
     our_side = side;
 
-    if (side == WHITE)
-    {
-        other_side = BLACK;
-    }
-    else 
-    {
-        other_side = WHITE;
-    }
+    other_side = (side == WHITE) ? BLACK : WHITE; // TERNARY OPERATOR GET HYPE
 
     board = Board();
 
@@ -51,39 +42,104 @@ Player::~Player() {
  * return nullptr.
  */
 
-int Player::applyHeuristic(int x, int y, int current_max)
+int Player::applyHeuristic(Board *board)
 {
-    int max_score = current_max;
-    if ( (x == 0 and y == 0) 
-        or (x == (SIZE_LEN - 1) and y == 0) 
-        or (x == 0 and y == (SIZE_LEN - 1)) 
-        or (x == (SIZE_LEN - 1) and y == (SIZE_LEN - 1)) )
+    int score;
+
+    for (int i = 0; i < SIZE_LEN; i++) 
     {
-        max_score *= CORNER_MUL;
+        for (int j = 0; j < SIZE_LEN; j++)
+        {
+            if (board->ourside_taken(i, j, our_side)) 
+            {
+                score += static_heuristic[i + 8*j];
+            }
+            
+        }
     }
 
-    if ((x == 0) or (y == 0) or (x == SIZE_LEN - 1) or (y == SIZE_LEN - 1))
+    return score;
+}
+
+int Player::get_worst_case(Board *board) 
+{
+    Board *copy = board->copy();
+
+    Move *next = new Move(0, 0);
+
+    int worst_score = BEST_SCORE + 1;
+
+    int worst_x;
+    int worst_y;
+
+    int check;
+
+    for (int i = 0; i < SIZE_LEN; i++) 
     {
-        max_score *= EDGE_MUL;
+        for (int j = 0; j < SIZE_LEN; j++)
+        {   
+            check = 0;
+            copy = board->copy();
+            *next = Move(i, j);
+            if (board->checkMove(next, other_side))
+            {
+                copy->doMove(next, other_side);                
+                check = applyHeuristic(copy);
+
+                if (check < worst_score) 
+                {
+                    worst_score = check;
+                    worst_x = i;
+                    worst_y = j;
+                }
+            }
+
+        }
     }
 
-    if ((x == 1 and y == SIZE_LEN - 2) or 
-        (x == 1 and y == 1) or 
-        (x == SIZE_LEN - 2 and y == 1) or 
-        (x == SIZE_LEN - 2 and y == SIZE_LEN - 2))
+    if (worst_score == BEST_SCORE + 1) // means no legal moves were found for the other team
     {
-        max_score *= DIAG_CORN;
+        delete next;
+        return BEST_SCORE; // This is a great move if it gets the other team stuck
     }
 
-    if ((x == 0 and y == 1) or (x == 0 and y == SIZE_LEN - 2) or
-        (x == SIZE_LEN - 1 and y == 1) or (x == SIZE_LEN - 1 and y == SIZE_LEN - 2) or
-        (x == 1 and y == 0) or (x == 1 and y == SIZE_LEN - 1) or
-        (x == SIZE_LEN - 2 and y == 0) or (x == SIZE_LEN - 2 and y == SIZE_LEN - 1))
+    *next = Move(worst_x, worst_y);
+    copy = board->copy();
+    copy->doMove(next, other_side);
+
+    Board *next_copy = copy->copy();
+
+    worst_score = BEST_SCORE + 1;
+
+    for (int i = 0; i < SIZE_LEN; i++) 
     {
-        max_score *= OTHER_CORN;
+        for (int j = 0; j < SIZE_LEN; j++)
+        {   
+            check = 0;
+            next_copy = copy->copy();
+            *next = Move(i, j);
+            if (board->checkMove(next, other_side))
+            {
+                copy->doMove(next, other_side);                
+                check = applyHeuristic(next_copy);
+
+                if (check < worst_score) 
+                {
+                    worst_score = check;
+                }
+            }
+
+        }
     }
 
-    return max_score;
+    if (worst_score == BEST_SCORE + 1) // means no legal moves were found for our team
+    {
+        delete next;
+        return WORST_SCORE; // this is definitely a bad move
+    }
+
+    delete next;
+    return worst_score;
 }
 
 Move *Player::doMove(Move *opponentsMove, int msLeft) {
@@ -94,11 +150,11 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 
     board.doMove(opponentsMove, other_side);
 
-    int max_x = -1;
-    int max_y = -1;
-    int max_score;
+    int best_x;
+    int best_y;
 
-    bool valid = false;
+    int minimax = WORST_SCORE - 1;
+    int check;
 
     Board *copy = board.copy();
     Move *next = new Move(0, 0);
@@ -108,41 +164,27 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
         {
             copy = board.copy();
             *next = Move(x, y);
-
             if (board.checkMove(next, our_side))
             {
                 copy->doMove(next, our_side);
-                if (valid == false)
+                
+                check = get_worst_case(copy);
+                if (check > minimax) 
                 {
-                    max_score = copy->count(our_side) - copy->count(other_side);
-                    max_x = next->getX();
-                    max_y = next->getY();
-                    max_score = applyHeuristic(max_x, max_y, max_score);
-                    valid = true;
+                    minimax = check;
+                    best_x = x;
+                    best_y = y;
                 }
-
-                int difference = copy->count(our_side) - copy->count(other_side);
-                difference = applyHeuristic(x, y, difference);
-
-                if (difference > max_score)
-                {
-                    max_x = next->getX();
-                    max_y = next->getY();
-                    max_score = difference;
-                }                
             }
         }
     }
 
-
-
-    if ( max_x == -1 )
+    if ( minimax == WORST_SCORE - 1 ) // we didn't find any legal moves for us
     {
         return nullptr;
     }
 
-    *next = Move(max_x, max_y);
+    *next = Move(best_x, best_y);
     board.doMove(next, our_side);
     return next;
-    
 }

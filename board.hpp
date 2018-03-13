@@ -26,6 +26,11 @@ public:
     bool isDone();
     bool hasMoves(Side side);
     bool checkMove(Move *m, Side side);
+
+    bool ourside_taken(int x, int y, Side side);
+    int get_num_legal_moves(Side side);
+
+
     void doMove(Move *m, Side side);
     int count(Side side);
     int countBlack();
